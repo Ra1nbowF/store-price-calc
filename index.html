@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Калькулятор стоимости</title>
+</head>
+<body>
+
+<div class="container">
+  <h2 class="title">Калькулятор стоимости товаров</h2>
+
+  <div class="input-group">
+    <select id="product" class="param__details">
+        <option value="0.4">Футболка/Майка/Рубашка (0.4 кг)</option>
+        <option value="0.8">Брюки / джинсы (0.8 кг)</option>
+        <option value="0.9">Худи / толстовка / свитшот (0.9 кг)</option>
+        <option value="1.5">Сумка / рюкзак (1.5 кг)</option>
+        <option value="0.6">Поясная сумка (0.6 кг)</option>
+        <option value="0.4">Шапка/ шарф / носки (0.4 кг)</option>
+        <option value="1.5">Ветровка / куртка (1.5 кг)</option>
+        <option value="1.9">Ботинки/ кеды / кроссовки (1.9 кг)</option>
+        <option value="2.5">Зимняя обувь (2.5 кг)</option>
+    </select>
+  </div>
+  
+  <div class="input-group">
+    <input type="number" id="price" class="param__details" placeholder="Стоимость товара в юанях">
+  </div>
+
+  <button onclick="calculate()" class="radio-label">Рассчитать</button>
+
+  <p id="result" class="param__value"></p>
+</div>
+
+<script>
+async function fetchExchangeRate() {
+    const apiKey = '080fcbb9d87c77b7bdca3f03'; // Replace with your actual API key
+    const baseCurrency = 'CNY'; 
+    const targetCurrency = 'RUB';
+    const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${baseCurrency}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.result === "success") {
+        return data.conversion_rates[targetCurrency];
+    } else {
+        throw new Error('Failed to fetch exchange rates:', data['error-type']);
+    }
+}
+
+    function calculate() {
+        var weight = parseFloat(document.getElementById("product").value);
+        var price = parseFloat(document.getElementById("price").value);
+
+        fetchExchangeRate()
+            .then(exchangeRate => {
+                if (exchangeRate) {
+                    var costRubles = weight * 619;
+                    var costYuan = price * exchangeRate;
+                    var totalCost = costRubles + costYuan;
+                    totalCost = totalCost * 1.1; 
+                    document.getElementById("result").innerHTML = "Стоимость " + " составляет: " + totalCost.toFixed(2) + " рублей";
+                } else {
+                    document.getElementById("result").innerHTML = "Ошибка при получении курса валюты. Пожалуйста, попробуйте позже.";
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при получении курса:', error);
+                document.getElementById("result").innerHTML = "Ошибка при получении курса валюты. Пожалуйста, попробуйте позже.";
+            });
+    }
+</script>
+
+</body>
+</html>
